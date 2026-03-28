@@ -62,6 +62,7 @@ data:
             <div class="info">
                 <strong>Deployment Method:</strong>
                 <ul>
+                    <li>VenkateshTest<li>
                     <li>Tool: ArgoCD (Declarative GitOps)</li>
                     <li>Git Repo: Your GitHub repository</li>
                     <li>Auto-Sync: Enabled (continuous deployment)</li>
