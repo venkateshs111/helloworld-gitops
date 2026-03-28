@@ -1,0 +1,129 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: helloworld-html
+  namespace: gitops-apps
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Hello World - ArgoCD GitOps</title>
+        <style>
+            body { 
+                display: flex; 
+                justify-content: center; 
+                align-items: center; 
+                height: 100vh; 
+                margin: 0; 
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                font-family: Arial, sans-serif;
+            }
+            .container {
+                text-align: center;
+                background: white;
+                padding: 50px;
+                border-radius: 10px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            }
+            h1 {
+                color: #333;
+                font-size: 48px;
+                margin: 0;
+            }
+            p {
+                color: #666;
+                font-size: 16px;
+                margin-top: 10px;
+            }
+            .info {
+                background: #e3f2fd;
+                padding: 15px;
+                border-radius: 5px;
+                margin-top: 20px;
+                text-align: left;
+            }
+            .tag {
+                display: inline-block;
+                background: #667eea;
+                color: white;
+                padding: 5px 15px;
+                border-radius: 20px;
+                margin-top: 20px;
+                margin-right: 10px;
+                font-size: 12px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Hello World</h1>
+            <p>GitOps Deployment via ArgoCD</p>
+            <div class="info">
+                <strong>Deployment Method:</strong>
+                <ul>
+                    <li>Tool: ArgoCD (Declarative GitOps)</li>
+                    <li>Git Repo: Your GitHub repository</li>
+                    <li>Auto-Sync: Enabled (continuous deployment)</li>
+                    <li>Self-Heal: Enabled (auto-recovery)</li>
+                </ul>
+            </div>
+            <span class="tag">🐙 Git</span>
+            <span class="tag">📦 ArgoCD</span>
+            <span class="tag">☸️ Kubernetes</span>
+        </div>
+    </body>
+    </html>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helloworld
+  namespace: gitops-apps
+  labels:
+    app: helloworld
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: helloworld
+  template:
+    metadata:
+      labels:
+        app: helloworld
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+          name: http
+        volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+      volumes:
+      - name: html
+        configMap:
+          name: helloworld-html
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: helloworld
+  namespace: gitops-apps
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30555
+    name: http
+  selector:
+    app: helloworld
